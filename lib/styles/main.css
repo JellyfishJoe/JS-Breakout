@@ -7,7 +7,7 @@ h1{
 	text-align: center;
 }
 
-canvas{
+#game{
 	background-color: #eeeeee;
 	margin: 0 auto;
 	display: block;
