@@ -13,3 +13,10 @@ h1{
 	display: block;
 	border: 2px solid black;
 }
+
+#restart{
+	display: flex;
+	margin: 0 auto;
+	text-align: center;
+	justify-content: center;
+}

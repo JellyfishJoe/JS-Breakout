@@ -6,12 +6,12 @@ let y = canvas.height - 15;
 
 let ballRadius = 10;
 
-let dx = 1;
-let dy = -2;
+let dx;
+let dy;
 
 //paddle
 const paddleHeight = 10;
-const paddleWidth = 75;
+const paddleWidth = 150;
 let paddleX = (canvas.width - paddleWidth) / 2;
 
 let rightPressed = false;
@@ -27,14 +27,27 @@ const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
 
 let bricks = [];
+let column = 0;
+let row = 0;
 for(c = 0; c < colCount; c++){
 	bricks[c] = [];
+	column++;
+	row = 0;
 	for(r = 0; r < rowCount; r++){
-		bricks[c][r] = {x:0, y:0};
+		row++;
+		bricks[c][r] = {x:0, y:0, status: 1, col: column, row: row};
 	}
 }
 
+console.log(bricks);
+
 var ballColor = "red";
+
+window.onload = setupGame();
+
+function setupGame(){
+	chooseBallDirection();
+}
 
 function drawBall(){
 	ctx.beginPath();
@@ -73,6 +86,7 @@ function gameLoop(){
 	drawBall();
 	drawPaddle();
 	drawBricks();
+	collisionDetection();
 
 	//paddle movement
 	if(rightPressed){
@@ -91,11 +105,11 @@ function gameLoop(){
 		paddleX = 0;
 	}
 
-	//paddle collision
 	if (x + dx < ballRadius || x + dx > canvas.width - ballRadius){
 		dx = -dx;
 	}
 
+	//paddle collision
 	if(y + dy < ballRadius){
 		dy = -dy;
 	}else if(y + dy > canvas.height - ballRadius){
@@ -103,9 +117,23 @@ function gameLoop(){
 			if(y = y - paddleHeight){
 				dy = -dy;
 				changeColors();
+				if(x > paddleX && x < paddleX + paddleWidth / 3){
+					if(dx > 0){
+						dx *= 0.5;
+					}else if(dx < 0){
+						dx *= 2;
+					}
+				}else if(x > paddleX + paddleWidth / 3 && x < paddleX + paddleWidth){
+					if(dx > 0){
+						dx *= 2;
+					}else if(dx < 0){
+						dx *= 0.5;
+					}
+				}
 			}
+			console.log(dx);
 		}else{
-			alert("Game Over");
+			gameOver();
 		}
 	}
 
@@ -133,19 +161,58 @@ function drawPaddle(){
 function drawBricks(){
 	for(c = 0; c < colCount; c++){
 		for(r = 0; r < rowCount; r++){
-			let brickX = (c * (brickWidth + brickPadding) + brickOffsetLeft);
-			let brickY = (r * (brickHeight + brickPadding) + brickOffsetTop);
-			bricks[c][r].x = 0;
-			bricks[c][r].y = 0;
-			ctx.beginPath();
-			ctx.fillStyle = ballColor;
-			ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-			ctx.closePath();
+			if(bricks[c][r].status == 1){
+				let brickX = (c * (brickWidth + brickPadding) + brickOffsetLeft);
+				let brickY = (r * (brickHeight + brickPadding) + brickOffsetTop);
+				bricks[c][r].x = brickX;
+				bricks[c][r].y = brickY;
+				ctx.beginPath();
+				ctx.fillStyle = ballColor;
+				ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+				ctx.closePath();
+			}
 		}
 	}
 }
 
-setInterval(gameLoop, 10);
+function chooseBallDirection(){
+	var max = (3 * Math.PI) / 4,
+		min = Math.PI / 4;
+	var angle = Math.random() * (max - min) + min;
+	dy = 1.5 * Math.sin(angle);
+	dx = 1.5 * Math.cos(angle);
+	console.log(dx);
+}
+
+function collisionDetection(){
+	for(c = 0; c < colCount; c++){
+		for(r = 0; r < rowCount; r++){
+			var b = bricks[c][r];
+			if(b.status == 1){
+				if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight){
+					console.log("brick is hit");
+					dy = -1.07 * dy;
+					b.status = 0;
+					console.log(bricks);
+				}
+			}
+		}
+	}
+}
+
+var gameInterval = setInterval(gameLoop, 10);
+
+function gameOver(){
+	clearInterval(gameInterval);
+	ctx.font = "50px Comic Sans MS";
+	ctx.fillStyle = "black";
+	ctx.textAlign = "center";
+	ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+}
+
+function restartGame(){
+	document.location.reload();
+}
 
 function changeColors(){
 	var r = rgb2hex(Math.floor(255 * Math.random()));
@@ -154,31 +221,22 @@ function changeColors(){
 	var color = "#" + r + g + b;
 	var invColor = findInverseColor(color);
 	ballColor = color;
-	console.log(invColor);
-	//console.log(document.getElementById("game").style.backgroundColor);
 	document.getElementById("game").style.backgroundColor = invColor;
 }
 
 function findInverseColor(hex){
-	console.log("hex = " + hex);
 	var color = hex2rgb(hex);
-	//console.log("color = " + color);
 	color = rgbInverse(color[0], color[1], color[2]);
 	color = rgb2hex(color);
 	return color;
 }
 
 function hex2rgb(hex){
-	//var hex = '#fefefe';
-	//console.log("hex again = " + hex);
 	hex = hex.replace(/[^0-9A-F]/gi, '');
-	//console.log("new hex = " + hex);
 	var r = parseInt(hex.slice(0, 2), 16),
 		g = parseInt(hex.slice(2, 4), 16),
 		b = parseInt(hex.slice(4, 6), 16);
-	//console.log(`r = ${r}, g = ${g}, b = ${b}`);
 	var rgb = [r, g, b];
-	//console.log(rgb);
 	return(rgb);
 }
 
@@ -190,7 +248,6 @@ function rgbInverse(r, g, b){
 }
 
 function rgb2hex(rgb){
-	//console.log(rgb);
 	var hex = rgb.toString(16);
 	if(hex.length < 2){
 		hex = "0" + hex;
