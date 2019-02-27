@@ -26,6 +26,10 @@ const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
 
+//scoring
+let score = 0;
+const neededScore = colCount * rowCount;
+
 let bricks = [];
 let column = 0;
 let row = 0;
@@ -82,11 +86,12 @@ document.addEventListener('keyup', keyUpHandler);
 
 function gameLoop(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	//changeColors();
 	drawBall();
 	drawPaddle();
-	drawBricks();
 	collisionDetection();
+	drawScore();
+	checkScore();
+	drawBricks();
 
 	//paddle movement
 	if(rightPressed){
@@ -123,7 +128,7 @@ function gameLoop(){
 					}else if(dx < 0){
 						dx *= 2;
 					}
-				}else if(x > paddleX + paddleWidth / 3 && x < paddleX + paddleWidth){
+				}else if(x > paddleX + 2 * paddleWidth / 3 && x < paddleX + paddleWidth){
 					if(dx > 0){
 						dx *= 2;
 					}else if(dx < 0){
@@ -133,18 +138,18 @@ function gameLoop(){
 			}
 			console.log(dx);
 		}else{
-			gameOver();
+			gameOver(0);
 		}
 	}
 
 	if(x + dx < ballRadius || x + dx  > canvas.width - ballRadius){
 		dx = -dx;
-		changeColors();
+		//changeColors();
 	}
 
 	if(y + dy < ballRadius || y + dy > canvas.height - ballRadius){
 		dy = -dy;
-		changeColors();
+		//changeColors();
 	}
 
 	x += dx;
@@ -175,6 +180,18 @@ function drawBricks(){
 	}
 }
 
+function drawScore(){
+	ctx.font = "20px Comis Sans MS";
+	ctx.fillStyle = "black";
+	ctx.fillText("Score: " + score, 0 , 20);
+}
+
+function checkScore(){
+	if(score == neededScore){
+		gameOver(1);
+	}
+}
+
 function chooseBallDirection(){
 	var max = (3 * Math.PI) / 4,
 		min = Math.PI / 4;
@@ -190,10 +207,10 @@ function collisionDetection(){
 			var b = bricks[c][r];
 			if(b.status == 1){
 				if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight){
-					console.log("brick is hit");
-					dy = -1.07 * dy;
+					dy = -1.17 * dy;
 					b.status = 0;
-					console.log(bricks);
+					score += 1;
+					changeColors();
 				}
 			}
 		}
@@ -202,17 +219,24 @@ function collisionDetection(){
 
 var gameInterval = setInterval(gameLoop, 10);
 
-function gameOver(){
+function gameOver(result){
 	clearInterval(gameInterval);
 	ctx.font = "50px Comic Sans MS";
 	ctx.fillStyle = "black";
 	ctx.textAlign = "center";
-	ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+	if(result == 1){
+		ctx.fillText("You Win!", canvas.width / 2, canvas.height / 2);
+	}else if(result == 0){
+		ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+	}
 }
 
 function restartGame(){
 	document.location.reload();
 }
+
+
+/////Color Changing/////
 
 function changeColors(){
 	var r = rgb2hex(Math.floor(255 * Math.random()));
