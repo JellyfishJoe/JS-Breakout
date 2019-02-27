@@ -1,8 +1,9 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-let x = canvas.width / 2;
-let y = canvas.height - 15;
+var gameInterval;
+
+let x, y;
 
 let ballRadius = 10;
 
@@ -10,9 +11,9 @@ let dx;
 let dy;
 
 //paddle
-const paddleHeight = 10;
-const paddleWidth = 150;
-let paddleX = (canvas.width - paddleWidth) / 2;
+const paddleHeight = 10,
+	  paddleWidth = 150;
+let paddleX;
 
 let rightPressed = false;
 let leftPressed = false;
@@ -26,31 +27,61 @@ const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
 
+let bricks = [];
+
 //scoring
 let score = 0;
 const neededScore = colCount * rowCount;
 
-let bricks = [];
-let column = 0;
-let row = 0;
-for(c = 0; c < colCount; c++){
-	bricks[c] = [];
-	column++;
-	row = 0;
-	for(r = 0; r < rowCount; r++){
-		row++;
-		bricks[c][r] = {x:0, y:0, status: 1, col: column, row: row};
+function setupBall(){
+	x = canvas.width / 2;
+	y = canvas.height - 15;
+	chooseBallDirection();
+}
+
+function setupPaddle(){
+	paddleX = (canvas.width - paddleWidth) / 2;
+}
+
+function buildBrickArray(){
+
+	bricks = [];
+	let column = 0;
+	let row = 0;
+
+	for(c = 0; c < colCount; c++){
+		bricks[c] = [];
+		column++;
+		row = 0;
+		for(r = 0; r < rowCount; r++){
+			row++;
+			bricks[c][r] = {x:0, y:0, status: 1, col: column, row: row};
+		}
 	}
 }
 
-console.log(bricks);
-
 var ballColor = "red";
 
-window.onload = setupGame();
+function loadTitle(){
+	ctx.font = "50px Comic Sans MS";
+	ctx.fillStyle = "black";
+	ctx.textAlign = "center";
+	ctx.fillText("JS BREAKOUT", canvas.width / 2, canvas.height / 2);
+}
 
 function setupGame(){
-	chooseBallDirection();
+	buildBrickArray();
+	setupBall();
+	setupPaddle();
+	score = 0;
+}
+
+function startGame(){
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	console.log("started");
+	setupGame();
+	console.log(bricks);
+	gameInterval = setInterval(gameLoop, 10);
 }
 
 function drawBall(){
@@ -136,7 +167,6 @@ function gameLoop(){
 					}
 				}
 			}
-			console.log(dx);
 		}else{
 			gameOver(0);
 		}
@@ -144,12 +174,10 @@ function gameLoop(){
 
 	if(x + dx < ballRadius || x + dx  > canvas.width - ballRadius){
 		dx = -dx;
-		//changeColors();
 	}
 
 	if(y + dy < ballRadius || y + dy > canvas.height - ballRadius){
 		dy = -dy;
-		//changeColors();
 	}
 
 	x += dx;
@@ -183,7 +211,7 @@ function drawBricks(){
 function drawScore(){
 	ctx.font = "20px Comis Sans MS";
 	ctx.fillStyle = "black";
-	ctx.fillText("Score: " + score, 0 , 20);
+	ctx.fillText("Score: " + score, 20 , 20);
 }
 
 function checkScore(){
@@ -199,6 +227,7 @@ function chooseBallDirection(){
 	dy = 1.5 * Math.sin(angle);
 	dx = 1.5 * Math.cos(angle);
 	console.log(dx);
+	console.log(dy);
 }
 
 function collisionDetection(){
@@ -207,6 +236,7 @@ function collisionDetection(){
 			var b = bricks[c][r];
 			if(b.status == 1){
 				if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight){
+					console.log("velocity changes");
 					dy = -1.17 * dy;
 					b.status = 0;
 					score += 1;
@@ -216,8 +246,6 @@ function collisionDetection(){
 		}
 	}
 }
-
-var gameInterval = setInterval(gameLoop, 10);
 
 function gameOver(result){
 	clearInterval(gameInterval);
@@ -229,10 +257,6 @@ function gameOver(result){
 	}else if(result == 0){
 		ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
 	}
-}
-
-function restartGame(){
-	document.location.reload();
 }
 
 
