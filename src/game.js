@@ -12,7 +12,7 @@ let dy;
 
 //paddle
 const paddleHeight = 10,
-	  paddleWidth = 150;
+	  paddleWidth = canvas.width;
 let paddleX;
 
 let rightPressed = false;
@@ -77,6 +77,7 @@ function setupGame(){
 }
 
 function startGame(){
+	clearInterval(gameInterval);
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	console.log("started");
 	setupGame();
@@ -155,15 +156,15 @@ function gameLoop(){
 				changeColors();
 				if(x > paddleX && x < paddleX + paddleWidth / 3){
 					if(dx > 0){
-						dx *= 0.5;
+						//dx *= 0.5;
 					}else if(dx < 0){
-						dx *= 2;
+						//dx *= 2;
 					}
 				}else if(x > paddleX + 2 * paddleWidth / 3 && x < paddleX + paddleWidth){
 					if(dx > 0){
-						dx *= 2;
+						//dx *= 2;
 					}else if(dx < 0){
-						dx *= 0.5;
+						//dx *= 0.5;
 					}
 				}
 			}
@@ -236,7 +237,6 @@ function collisionDetection(){
 			var b = bricks[c][r];
 			if(b.status == 1){
 				if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight){
-					console.log("velocity changes");
 					dy = -1.17 * dy;
 					b.status = 0;
 					score += 1;
@@ -248,6 +248,7 @@ function collisionDetection(){
 }
 
 function gameOver(result){
+	console.log("end");
 	clearInterval(gameInterval);
 	ctx.font = "50px Comic Sans MS";
 	ctx.fillStyle = "black";
