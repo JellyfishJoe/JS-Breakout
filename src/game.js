@@ -35,7 +35,7 @@ const neededScore = colCount * rowCount;
 
 function setupBall(){
 	x = canvas.width / 2;
-	y = canvas.height - 15;
+	y = canvas.height - 60;
 	chooseBallDirection();
 }
 
@@ -225,10 +225,10 @@ function chooseBallDirection(){
 	var max = (3 * Math.PI) / 4,
 		min = Math.PI / 4;
 	var angle = Math.random() * (max - min) + min;
-	dy = 1.5 * Math.sin(angle);
+	dy = -1.5 * Math.sin(angle);
 	dx = 1.5 * Math.cos(angle);
-	console.log(dx);
-	console.log(dy);
+	//console.log('dx = ' + dx);
+	//console.log('dy = ' + dy);
 }
 
 function collisionDetection(){
@@ -237,7 +237,7 @@ function collisionDetection(){
 			var b = bricks[c][r];
 			if(b.status == 1){
 				if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight){
-					dy = -1.17 * dy;
+					dy = -1.27 * dy;
 					b.status = 0;
 					score += 1;
 					changeColors();
@@ -248,7 +248,7 @@ function collisionDetection(){
 }
 
 function gameOver(result){
-	console.log("end");
+	//console.log("end");
 	clearInterval(gameInterval);
 	ctx.font = "50px Comic Sans MS";
 	ctx.fillStyle = "black";
