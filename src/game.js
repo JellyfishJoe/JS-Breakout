@@ -12,7 +12,8 @@ let dy;
 
 //paddle
 const paddleHeight = 10,
-	  paddleWidth = canvas.width;
+	  //paddleWidth = canvas.width;
+	  paddleWidth = 20;
 let paddleX;
 
 let rightPressed = false;
